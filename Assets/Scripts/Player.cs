@@ -6,6 +6,12 @@ public class Player : MonoBehaviour
 {
 
     public float Speed;
+    public float JumpForce;
+
+    private float timeAttack; // Contador
+    public float startTimeAttack; // Tempo da animação
+
+    private bool isGrounded;
     private Rigidbody2D rigidBody;
     private Animator animator;
     private SpriteRenderer sprite;
@@ -51,5 +57,40 @@ public class Player : MonoBehaviour
             //Rotacionar player para direita
             sprite.flipX = false;
         }
+
+        if(Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+        {
+            rigidBody.AddForce(Vector2.up * JumpForce, ForceMode2D.Impulse);
+            isGrounded = false;
+            animator.SetBool("isJumping", true);
+        }
+
+        if(timeAttack <= 0)
+        {
+            if(Input.GetKeyDown(KeyCode.Z))
+            {
+                animator.SetTrigger("isAttacking"); // Iniciou animacao
+                timeAttack = startTimeAttack; // tempo para colocar no unity
+                print(timeAttack);
+            }
+        }
+        else
+        {
+            timeAttack -= Time.deltaTime; //Decrescer em tempo real
+            animator.SetTrigger("isAttacking"); //Terminou animacao
+        }
+        
     }
+
+    void OnCollisionEnter2D(Collision2D coll) {
+
+        //Personagem esta tocando o chao
+        if(coll.gameObject.layer == 8)
+        {
+            isGrounded = true;
+            animator.SetBool("isJumping", false);
+        }
+        
+    }
+
 }
