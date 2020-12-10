@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-
     public float Speed;
     public float JumpForce;
-
-    private float timeAttack; // Contador
     public float startTimeAttack; // Tempo da animação
+    public Transform point; // ponto a partir de quando a energy é criada
+    public GameObject energy;
 
+    private bool isAttacking;
+    private float timeAttack; // Contador
     private bool isGrounded;
     private Rigidbody2D rigidBody;
     private Animator animator;
@@ -26,10 +27,10 @@ public class Player : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         //Logica do personagem se movimentando
-        if(Input.GetKey(KeyCode.LeftArrow))
+        if(Input.GetKey(KeyCode.LeftArrow) && !isAttacking)
         {
             rigidBody.velocity = new Vector2(-Speed, rigidBody.velocity.y);
 
@@ -47,7 +48,7 @@ public class Player : MonoBehaviour
             animator.SetBool("isWalking", false);
         }
 
-        if(Input.GetKey(KeyCode.RightArrow))
+        if(Input.GetKey(KeyCode.RightArrow) && !isAttacking)
         {
             rigidBody.velocity = new Vector2(Speed, rigidBody.velocity.y);
 
@@ -67,19 +68,29 @@ public class Player : MonoBehaviour
 
         if(timeAttack <= 0)
         {
+            isAttacking = false;
+
             if(Input.GetKeyDown(KeyCode.Z))
             {
-                animator.SetTrigger("isAttacking"); // Iniciou animacao
+                animator.SetBool("isAttacking", true); // Iniciou animacao
                 timeAttack = startTimeAttack; // tempo para colocar no unity
-                print(timeAttack);
+                isAttacking = true;
             }
         }
         else
         {
             timeAttack -= Time.deltaTime; //Decrescer em tempo real
-            animator.SetTrigger("isAttacking"); //Terminou animacao
+            animator.SetBool("isAttacking", false); //Terminou animacao
         }
         
+        animator.SetBool("isAttacking", isAttacking);
+
+        if(Input.GetKeyDown(KeyCode.X)){
+            //Variavel local que recebe a bala da cena
+            GameObject bullet = Instantiate(energy);
+
+            bullet.transform.position = point.transform.position;
+        }
     }
 
     void OnCollisionEnter2D(Collision2D coll) {
