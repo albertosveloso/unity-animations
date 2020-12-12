@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     public float startTimeAttack; // Tempo da animação
     public Transform point; // ponto a partir de quando a energy é criada
     public GameObject energy;
+    public Transform backPoint;
 
     private bool isAttacking;
     private float timeAttack; // Contador
@@ -86,10 +87,22 @@ public class Player : MonoBehaviour
         animator.SetBool("isAttacking", isAttacking);
 
         if(Input.GetKeyDown(KeyCode.X)){
+
             //Variavel local que recebe a bala da cena
             GameObject bullet = Instantiate(energy);
 
-            bullet.transform.position = point.transform.position;
+            //Chamando audio
+            AudioController.current.PlayMusic(AudioController.current.sfx);
+
+            //Player está para esquerda
+            if(sprite.flipX)
+            {
+                //Chama o point de trás
+                bullet.transform.position = backPoint.transform.position;
+            }else
+            {
+                bullet.transform.position = point.transform.position;
+            }
         }
     }
 
@@ -100,6 +113,16 @@ public class Player : MonoBehaviour
         {
             isGrounded = true;
             animator.SetBool("isJumping", false);
+        }
+
+        //Inimigo
+        if(coll.gameObject.tag == "Enemy"){
+            coll.gameObject.GetComponent<Animator>().SetTrigger("hit");
+            Destroy(coll.gameObject, 1f);
+            rigidBody.AddForce(Vector2.up * JumpForce, ForceMode2D.Impulse);
+
+            //Chamando audio
+            AudioController.current.PlayMusic(AudioController.current.anotherSfx);
         }
         
     }
